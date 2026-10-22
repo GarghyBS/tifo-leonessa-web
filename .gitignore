@@ -1,0 +1,24 @@
+# File Python non necessari
+*.pyc
+__pycache__/
+*.pyo
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Ambiente Python
+.env
+.env.*
+
+# File di log
+*.log
+logs/
+
+# Render
+render.yaml.local
+
+# File generati
+config.py
+generate_frontend.py

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ciao Associazione</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #2196F3 0%, #2196F3 100%); padding: 20px; min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        h1 { text-align: center; color: #333; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; font-size: 14px; }
+        .form-section { margin-bottom: 30px; padding: 30px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 15px; border: 2px solid rgba(#2196F3, 0.2); }
+        .form-section h2 { color: #2d3748; margin-bottom: 20px; font-size: 22px; padding-bottom: 15px; border-bottom: 3px solid #2196F3; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; color: #495057; font-size: 14px; }
+        .required { color: #dc3545; margin-left: 3px; }
+        input, select { width: 100%; padding: 12px 15px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 15px; transition: all 0.3s; }
+        input:focus, select:focus { border-color: #667eea; outline: none; box-shadow: 0 0 0 3px rgba(#667eea, 0.1); }
+        button { padding: 15px 30px; font-size: 16px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s; margin-top: 15px; }
+        .btn-primary { background: linear-gradient(135deg, #2196F3, #3f51b5); color: white; width: 100%; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(#2196F3, 0.3); }
+        .alert { padding: 15px 20px; margin: 15px 0; border-radius: 10px; display: none; }
+        .alert.show { display: block; animation: fadeIn 0.3s; }
+        .alert.success { background: rgba(76, 175, 80, 0.9); color: white; }
+        .alert.error { background: rgba(244, 67, 54, 0.9); color: white; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Ciao Associazione</h1>
+        <p class="subtitle">Gestione Iscrizioni</p>
+        
+        <div class="alert" id="alert"></div>
+        
+        <form id="iscrizioneForm" class="form-section">
+            <h2>📝 Compilare i tuoi dati per l'iscrizione</h2>
+            <div class="form-group">
+                <label>Cognome <span class="required">*</span></label>
+                <input type="text" id="cognome" name="cognome" required placeholder="Inserisci il tuo cognome">
+            </div>
+            <div class="form-group">
+                <label>Nome <span class="required">*</span></label>
+                <input type="text" id="nome" name="nome" required placeholder="Inserisci il tuo nome">
+            </div>
+            <div class="form-group">
+                <label>Data di Nascita <span class="required">*</span></label>
+                <input type="date" id="data_nascita" name="data_nascita" required>
+            </div>
+            <div class="form-group">
+                <label>Luogo di Nascita <span class="required">*</span></label>
+                <input type="text" id="luogo_nascita" name="luogo_nascita" required placeholder="Es: Roma (RO)">
+            </div>
+            <div class="form-group">
+                <label>Residenza <span class="required">*</span></label>
+                <input type="text" id="residenza" name="residenza" required placeholder="Indirizzo di residenza">
+            </div>
+            <div class="form-group">
+                <label>Codice Fiscale <span class="required">*</span></label>
+                <input type="text" id="codice_fiscale" name="codice_fiscale" maxlength="16" required placeholder="Inserisci il tuo codice fiscale">
+            </div>
+            <div class="form-group">
+                <label>Numero Tessera Irreducibili <span class="required">*</span></label>
+                <input type="text" id="numero_tessera" name="numero_tessera" required placeholder="N° tessera irreducibili">
+            </div>
+            <button type="submit" class="btn-primary">✅ Invia Iscrizione</button>
+        </form>
+        
+        <div class="admin-section" style="display: none;">
+            <h1 style="color: #9C27B0;">👤 Dashboard Amministrativa</h1>
+            <div class="stats">
+                <div class="stat-box"><div class="stat-number"><span id="total">0</span></div><div>Totale Iscrizioni</div></div>
+                <div class="stat-box signed"><div class="stat-number" style="color: #4CAF50;"><span id="signed">0</span></div><div>Firmati</div></div>
+                <div class="stat-box not-signed"><div class="stat-number" style="color: #ff9800;"><span id="not_signed">0</span></div><div>Non Firmati</div></div>
+            </div>
+            <table id="iscrittiTable"><thead><tr><th>ID</th><th>Nome</th><th>Cognome</th><th>Data Nascita</th><th>Luogo Nascita</th><th>Residenza</th><th>Codice Fiscale</th><th>Numero Tessera</th><th>Data Iscrizione</th><th>Firmato</th><th>Azioni</th></tr></thead><tbody id="tableBody"></tbody></table>
+            <button onclick="downloadExcel()" style="margin-top: 20px; background: #673AB7; color: white; width: auto; padding: 10px 20px;">📊 Scarica Excel</button>
+        </div>
+        
+        <div class="admin-section" id="loginSection" style="display: none;">
+            <h2>🔐 Accedi come Admin</h2>
+            <form id="loginForm" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <input type="text" id="username" placeholder="Username" style="width: 200px;">
+                <input type="password" id="password" placeholder="Password" style="width: 200px;">
+                <button type="submit" style="width: auto; padding: 10px 20px; background: #2196F3;">Login</button>
+            </form>
+        </div>
+
+        <script>
+            const ADMIN_USERNAME = "admin";
+            const ADMIN_PASSWORD = "admin123";
+            let iscrizioni = [], isAdmin = false, session_id = null;
+            
+            async function loadIscrizioni() {
+                try {
+                    const response = await fetch('/api/iscrizioni')
+                    iscrizioni = await response.json()
+                    displayTable(iscrizioni)
+                } catch (error) { console.error('Errore:', error) }
+            }
+            
+            document.getElementById('iscrizioneForm').addEventListener('submit', async (e) => {
+                e.preventDefault()
+                const data = {
+                    cognome: document.getElementById('cognome').value,
+                    nome: document.getElementById('nome').value,
+                    data_nascita: document.getElementById('data_nascita').value,
+                    luogo_nascita: document.getElementById('luogo_nascita').value,
+                    residenza: document.getElementById('residenza').value,
+                    codice_fiscale: document.getElementById('codice_fiscale').value.toUpperCase().trim(),
+                    numero_tessera: document.getElementById('numero_tessera').value,
+                }
+                showAlert('Invio...', 'info')
+                try {
+                    const response = await fetch('/api/iscrizioni', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) })
+                    const result = await response.json()
+                    if (result.success) { showAlert('✅ Iscrizione avvenuta!', 'success'); document.getElementById('iscrizioneForm').reset(); loadIscrizioni() } else { showAlert('❌ ' + result.message, 'error') }
+                } catch (error) { showAlert('❌ Errore', 'error') }
+            })
+            
+            function showAdmin() { document.getElementById('loginSection').style.display = 'block'; document.querySelector('.admin-section').classList.remove('active'); }
+            
+            async function downloadExcel() {
+                if (!isAdmin) { showAlert('Accesso admin richiesto', 'error'); return }
+                try {
+                    const response = await fetch('/api/excel?session_data={"session_id":' + session_id + '}')
+                    const blob = await response.blob()
+                    const url = window.URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = 'elenco_iscritti_' + new Date().toISOString().split('T')[0] + '.xlsx'
+                    document.body.appendChild(a)
+                    a.click()
+                    window.URL.revokeObjectURL(url)
+                    document.body.removeChild(a)
+                    showAlert('📊 Excel scaricato!', 'success')
+                } catch (error) { showAlert('❌ Errore', 'error') }
+            }
+            
+            async function confirmIscrizione(id) {
+                if (!isAdmin) { showAlert('Accesso admin', 'error'); return }
+                try {
+                    const response = await fetch('/api/iscrizioni/' + id + '/conferma', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({session_id}) })
+                    const data = await response.json()
+                    if (data.success) { showAlert('✔ Firma confermata!', 'success'); loadIscrizioni() } else { showAlert('❌ ' + data.error, 'error') }
+                } catch (error) { showAlert('❌ Errore', 'error') }
+            }
+            
+            async function downloadPDF(id) {
+                if (!isAdmin) { showAlert('Accesso admin richiesto', 'error'); return }
+                try {
+                    const response = await fetch('/api/pdf/' + id + '?session_data={"session_id":"' + session_id + '"}')
+                    const blob = await response.blob()
+                    const url = window.URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = 'ricevuta_' + id + '.pdf'
+                    document.body.appendChild(a)
+                    a.click()
+                    window.URL.revokeObjectURL(url)
+                    document.body.removeChild(a)
+                    showAlert('📄 PDF scaricato!', 'success')
+                } catch (error) { showAlert('❌ Errore', 'error') }
+            }
+            
+            function deleteIscrizione(id) {
+                if (!isAdmin) { showAlert('Accesso admin', 'error'); return }
+                if (!confirm('Eliminare questa iscrizione?')) return
+                try {
+                    const response = await fetch('/api/iscrizioni/' + id, { method: 'DELETE', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({session_id}) })
+                    const data = await response.json()
+                    if (data.success) { showAlert('Eliminata!', 'success'); loadIscrizioni() }
+                } catch (error) { showAlert('❌ Errore', 'error') }
+            }
+            
+            function showAlert(message, type) {
+                const alert = document.getElementById('alert')
+                alert.textContent = message
+                alert.className = 'alert ' + type + ' show'
+                setTimeout(() => alert.classList.remove('show'), 5000)
+            }
+            
+            loadIscrizioni()
+        </script>
+    </div>
+</body>
+</html>

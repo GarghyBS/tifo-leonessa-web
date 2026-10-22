@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: iscrizione-backend
+    env: python
+    runtime: python 3.11
+    buildCommand: pip install -r requirements_backend.txt
+    startCommand: gunicorn app:app -b 0.0.0.0:10000 --log-file -
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SQLALCHEMY_DATABASE_URI
+        fromDatabase:
+          name: iscrizione-db
+          property: uri
+      - key: SQLALCHEMY_TRACK_NOTIFICATIONS
+        value: false
+      - key: FLASK_ENV
+        value: production
+      - key: DATABASE_NAME
+        value: iscrizioni_db
+      - key: DATABASE_PASSWORD
+        generateValue: true
+      - key: DATABASE_USER
+        value: postgres
+    disk: 200
+
+  - type: web
+    name: iscrizioni-frontend
+    env: static
+    buildCommand: echo "No build required"
+    static:
+      - web-app/build:/web-app
+
+envVars:
+  - key: PROXY_INCOMING_REQUESTS
+    fromProvider: upstream
+
+webhooks:
+  - event: deploy
+    url: https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN

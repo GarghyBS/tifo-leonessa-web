@@ -1,0 +1,58 @@
+{
+  "associazione": {
+    "nome": "Associazione Irreducibili",
+    "sottotitolo": "Gestione Iscrizioni",
+    "indirizzo": "Via Roma 123, 00100 Città (RO)",
+    "telefono": "+39 010 1234567",
+    "email": "segreteria@associazione.it"
+  },
+  "colori": {
+    "primary": "#4CAF50",
+    "primary_dark": "#45a049",
+    "secondary": "#667eea",
+    "accent": "#FF9800",
+    "danger": "#f44336",
+    "background": "#f5f5f5",
+    "white": "#ffffff",
+    "text": "#333333",
+    "light": "#666666",
+    "blue": "#2196F3",
+    "purple": "#673AB7"
+  },
+  "titoli": {
+    "page_title": "Gestione Iscrizioni Associazione",
+    "page_subtitle": "Piattaforma online per gestione iscrizioni, PDF e report Excel",
+    "form_title": "Compilare i tuoi dati per l'iscrizione",
+    "form_subtitle": "Compila tutti i campi e invia il form per completare la tua richiesta di iscrizione.",
+    "admin_title": "Dashboard Amministrativa",
+    "login_button": "Accesso Admin",
+    "download_excel": "Scarica Excel",
+    "download_pdf": "Scarica PDF"
+  },
+  "admin": {
+    "username": "admin",
+    "password": "admin123",
+    "admin_username_display": "Amministratore"
+  },
+  "labels": {
+    "nome": "Nome",
+    "cognome": "Cognome",
+    "data_nascita": "Data di Nascita",
+    "luogo_nascita": "Luogo di Nascita",
+    "residenza": "Residenza",
+    "codice_fiscale": "Codice Fiscale",
+    "numero_tessera": "Numero Tessera Irreducibili"
+  },
+  "messaggi": {
+    "success": {
+      "iscrizione": "Iscrizione avvenuta con successo! Riceverai a breve le tue documentazioni.",
+      "conferma_firma": "Firma confermata con successo!",
+      "download_pdf": "PDF scaricato con successo!",
+      "download_excel": "Excel scaricato con successo!"
+    },
+    "error": {
+      "generic": "Si è verificato un errore. Riprova più tardi.",
+      "access": "Accesso non autorizzato."
+    }
+  }
+}

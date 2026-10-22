@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Amministrativa - Associazione</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
+        .user-info { background: #e3f2fd; padding: 15px 20px; border-radius: 8px; }
+        .user-info h3 { color: #1976D2; margin-bottom: 5px; }
+        
+        .stats { display: flex; justify-content: space-around; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
+        .stat-box { text-align: center; padding: 20px; background: #e3f2fd; border-radius: 10px; flex: 1; min-width: 150px; }
+        .stat-number { font-size: 32px; font-weight: bold; color: #2196F3; }
+        .stat-label { color: #666; font-size: 14px; margin-top: 5px; }
+        .stat-box.signed { background: #e8f5e9; }
+        .stat-box.signed .stat-number { color: #4CAF50; }
+        .stat-box.not-signed { background: #fff3e0; }
+        .stat-box.not-signed .stat-number { color: #ff9800; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #4CAF50; color: white; font-weight: bold; }
+        th:nth-child(2), th:nth-child(3) { color: white; }
+        tr:hover { background: #f5f5f5; }
+        
+        .badge { padding: 5px 10px; border-radius: 3px; font-size: 12px; font-weight: bold; }
+        .badge.signed { background: #4CAF50; color: white; }
+        .badge.not-signed { background: #ff9800; color: white; }
+        
+        .action-buttons { display: flex; gap: 5px; flex-wrap: wrap; }
+        .confirm-btn { background: #2196F3; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        .confirm-btn:hover { background: #1976D2; }
+        .download-btn { background: #FF9800; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        .download-btn:hover { background: #F57C00; }
+        .delete-btn { background: #f44336; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        .delete-btn:hover { background: #d32f2f; }
+        
+        .filters { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filters select, .filters input { padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; }
+        .filters button { padding: 8px 15px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        
+        .export-section { display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+        .export-btn { padding: 10px 20px; background: #673AB7; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .export-btn:hover { background: #5e35b5; }
+        
+        .message { padding: 15px; margin: 15px 0; border-radius: 8px; display: none; }
+        .message.success { background: #e8f5e9; border: 1px solid #4CAF50; }
+        .message.error { background: #ffebee; border: 1px solid #f44336; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>👤 Dashboard Amministrativa</h1>
+                <p>Associazione - Gestione Iscrizioni</p>
+            </div>
+            <div class="user-info">
+                <h3 id="usernameDisplay">Benvenuto, Amministratore</h3>
+                <button onclick="logout()" style="background: #f44336; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-top: 5px;">🔐 Esci</button>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-number"><span id="total">0</span></div>
+                <div class="stat-label">Totale Iscrizioni</div>
+            </div>
+            <div class="stat-box signed">
+                <div class="stat-number"><span id="signed">0</span></div>
+                <div class="stat-label">Iscritti Firmati</div>
+            </div>
+            <div class="stat-box not-signed">
+                <div class="stat-number"><span id="not_signed">0</span></div>
+                <div class="stat-label">Iscritti Non Firmati</div>
+            </div>
+        </div>
+        
+        <div class="filters">
+            <input type="text" id="search" placeholder="Cerca per nome/cognome...">
+            <select id="filter_status">
+                <option value="">Tutti gli iscritti</option>
+                <option value="signed">Solo firmati</option>
+                <option value="not_signed">Solo non firmati</option>
+            </select>
+            <button onclick="applyFilters()">Filtro</button>
+            <button onclick="clearFilters()">Resetta</button>
+        </div>
+        
+        <table id="iscrittiTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Cognome</th>
+                    <th>Data Nascita</th>
+                    <th>Luogo Nascita</th>
+                    <th>Residenza</th>
+                    <th>Codice Fiscale</th>
+                    <th>Numero Tessera</th>
+                    <th>Data Iscrizione</th>
+                    <th>Firmato</th>
+                    <th>Data Firma</th>
+                    <th>Azioni</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+        
+        <div class="export-section">
+            <button onclick="downloadExcel()" style="background: #673AB7; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer;">📊 Scarica Excel</button>
+            <button onclick="downloadAllPDFs()" style="background: #FF9800; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer;">📄 Scarica Tutti i PDF</button>
+        </div>
+        
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        let iscrizioni = []
+        let isAdmin = false
+        const ADMIN_USERNAME = "admin"
+        const ADMIN_PASSWORD = "admin123"
+        let loggedUser = null
+        
+        // Carica iscrizioni
+        async function loadIscrizioni() {
+            try {
+                const response = await fetch('/api/iscrizioni')
+                iscrizioni = await response.json()
+                renderTable()
+                updateStats()
+            } catch (error) {
+                showMessage('Errore nel caricamento dei dati', 'error')
+                console.error('Errore nel caricamento:', error)
+            }
+        }
+        
+        // Login admin
+        async function loginAdmin(username, password) {
+            const response = await fetch('/api/auth', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, password})
+            })
+            
+            const data = await response.json()
+            
+            if (data.success) {
+                isAdmin = true
+                loggedUser = data.user
+                document.getElementById('usernameDisplay').textContent = 'Benvenuto, ' + loggedUser.username
+                showMessage('Login effettuato con successo!', 'success')
+                setTimeout(() => showMessage('', ''), 3000)
+            } else {
+                showMessage('Credenziali non corrette', 'error')
+                return false
+            }
+            
+            loadIscrizioni()
+            return true
+        }
+        
+        // Logout
+        function logout() {
+            isAdmin = false
+            loggedUser = null
+            document.getElementById('usernameDisplay').textContent = 'Benvenuto, Amministratore'
+            showMessage('Logout effettuato.', 'success')
+            setTimeout(() => showMessage('', ''), 3000)
+        }
+        
+        // Apply filters
+        function applyFilters() {
+            const search = document.getElementById('search').value.toLowerCase()
+            const status = document.getElementById('filter_status').value
+            
+            let filtered = iscrizioni.filter(i => {
+                const matchSearch = i.nome.toLowerCase().includes(search) || 
+                                  i.cognome.toLowerCase().includes(search)
+                const matchStatus = status === '' ? true : 
+                                   status === 'signed' ? i.firma : !i.firma
+                return matchSearch && matchStatus
+            })
+            
+            displayTable(filtered)
+        }
+        
+        // Clear filters
+        function clearFilters() {
+            document.getElementById('search').value = ''
+            document.getElementById('filter_status').value = ''
+            displayTable(iscrizioni)
+        }
+        
+        // Display filtered table
+        function displayTable(data) {
+            const tbody = document.getElementById('tableBody')
+            tbody.innerHTML = ''
+            
+            document.getElementById('total').textContent = data.length
+            document.getElementById('signed').textContent = data.filter(i => i.firma).length
+            document.getElementById('not_signed').textContent = data.filter(i => !i.firma).length
+            
+            data.forEach(iscritto => {
+                const tr = document.createElement('tr')
+                tr.innerHTML = `
+                    <td>${iscritto.id}</td>
+                    <td>${iscritto.nome}</td>
+                    <td>${iscritto.cognome}</td>
+                    <td>${iscritto.data}</td>
+                    <td>${iscritto.luo}</td>
+                    <td>${iscritto.res}</td>
+                    <td>${iscritto.codice}</td>
+                    <td>${iscritto.tessera}</td>
+                    <td>${iscritto.data_iscrizione}</td>
+                    <td><span class="badge ${iscritto.firma ? 'signed' : 'not-signed'}">${iscritto.firma ? '✔' : '✘'}</span></td>
+                    <td>${iscritto.data_firma || '-'}</td>
+                    <td class="action-buttons">
+                        ${!iscritto.firma ? `<button class="confirm-btn" onclick="confirmIscrizione(${iscritto.id})">✔</button>` : ''}
+                        <button class="download-btn" onclick="downloadPDF(${iscritto.id})">📄</button>
+                        <button class="delete-btn" onclick="deleteIscrizione(${iscritto.id})">🗑</button>
+                    </td>
+                `
+                tbody.appendChild(tr)
+            })
+        }
+        
+        // Confirm signature
+        async function confirmIscrizione(id) {
+            if (!isAdmin) { showMessage('Accesso admin richiesto', 'error'); return }
+            
+            try {
+                const response = await fetch('/api/iscrizioni/' + id + '/conferma', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                })
+                
+                const data = await response.json()
+                
+                if (data.success) {
+                    showMessage('Firma confermata con successo per l\'iscritto ID ' + id, 'success')
+                    setTimeout(() => showMessage('', ''), 3000)
+                    loadIscrizioni()
+                } else {
+                    showMessage('Errore: ' + data.error, 'error')
+                }
+            } catch (error) {
+                showMessage('Si è verificato un errore.', 'error')
+                console.error('Errore:', error)
+            }
+        }
+        
+        // Download single PDF
+        async function downloadPDF(id) {
+            if (!isAdmin) { showMessage('Accesso admin richiesto', 'error'); return }
+            
+            try {
+                const response = await fetch('/api/pdf/' + id)
+                const blob = await response.blob()
+                const url = window.URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = 'ricevuta_' + id + '.pdf'
+                document.body.appendChild(a)
+                a.click()
+                window.URL.revokeObjectURL(url)
+                document.body.removeChild(a)
+                showMessage('PDF scaricato con successo!', 'success')
+                setTimeout(() => showMessage('', ''), 3000)
+            } catch (error) {
+                showMessage('Errore nel download PDF.', 'error')
+                console.error('Errore:', error)
+            }
+        }
+        
+        // Download all PDFs as ZIP (we can't do ZIP, so we'll open each in new tab)
+        async function downloadAllPDFs() {
+            if (!isAdmin) { showMessage('Accesso admin richiesto', 'error'); return }
+            
+            // Since we can't do ZIP, let's open each PDF in new tabs
+            iscrizioni.forEach(iscritto => {
+                if (iscritto.firma) {
+                    const url = '/api/pdf/' + iscrivito.id + '/completo'
+                    window.open(url, '_blank')
+                }
+            })
+            
+            showMessage('PDF generati! Apre una nuova finestra per ogni PDF.', 'success')
+            setTimeout(() => showMessage('', ''), 3000)
+        }
+        
+        // Download Excel
+        async function downloadExcel() {
+            if (!isAdmin) { showMessage('Accesso admin richiesto', 'error'); return }
+            
+            try {
+                const response = await fetch('/api/excel')
+                const blob = await response.blob()
+                const url = window.URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = 'elenco_iscritti_' + new Date().toISOString().split('T')[0] + '.xlsx'
+                document.body.appendChild(a)
+                a.click()
+                window.URL.revokeObjectURL(url)
+                document.body.removeChild(a)
+                showMessage('Excel scaricato con successo!', 'success')
+                setTimeout(() => showMessage('', ''), 3000)
+            } catch (error) {
+                showMessage('Errore nel download Excel.', 'error')
+                console.error('Errore:', error)
+            }
+        }
+        
+        // Delete iscrizione
+        async function deleteIscrizione(id) {
+            if (!isAdmin) { showMessage('Accesso admin richiesto', 'error'); return }
+            
+            if (!confirm('Sei sicuro di voler eliminare questa iscrizione?')) return
+            
+            try {
+                const response = await fetch('/api/iscrizioni/' + id, {
+                    method: 'DELETE',
+                    headers: {'Content-Type': 'application/json'}
+                })
+                
+                const data = await response.json()
+                
+                if (data.success) {
+                    showMessage('Iscrizione eliminata!', 'success')
+                    setTimeout(() => showMessage('', ''), 3000)
+                    loadIscrizioni()
+                } else {
+                    showMessage('Errore: ' + data.error, 'error')
+                }
+            } catch (error) {
+                showMessage('Si è verificato un errore.', 'error')
+                console.error('Errore:', error)
+            }
+        }
+        
+        // Show message
+        function showMessage(text, type) {
+            const msg = document.getElementById('message')
+            msg.textContent = text
+            msg.className = 'message ' + type
+            msg.style.display = 'block'
+        }
+        
+        // Initialize
+        loadIscrizioni()
+    </script>
+</body>
+</html>
